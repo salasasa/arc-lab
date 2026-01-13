@@ -1,0 +1,32 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test binary, built with `go test -c`
+*.test
+
+# Output of the go coverage tool, specifically when used with LiteIDE
+*.out
+
+# Dependency directories (remove rates if you want to check in dependencies)
+vendor/
+
+# Go-Zero build files
+etc/*.yaml
+!etc/config.yaml # 允许保留基础模板，但敏感字段用环境变量占位
+
+# IDEs
+.idea/
+.vscode/
+
+# Local env files
+.env
+*.local
+
+# K3s / Local certificates
+*.kubeconfig
+*.pem
