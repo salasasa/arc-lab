@@ -1,0 +1,83 @@
+syntax = "v1"
+
+info(
+    title: "Arc-Lab Gateway"
+    desc: "Arc-Lab 统一接入网关"
+    author: "arc"
+    version: "v1"
+)
+
+// ==========================================
+// 1. 数据结构定义 (DTO)
+// ==========================================
+
+// 登录请求
+type LoginReq {
+    Username string `json:"username"` // 用户名
+    Password string `json:"password"` // 密码
+}
+
+// 登录响应 (返回 Token)
+type LoginResp {
+    AccessToken  string `json:"access_token"`  // JWT Token
+    AccessExpire int64  `json:"access_expire"` // 过期时间戳
+    Role         string `json:"role"`          // 角色：admin | recruiter | guest
+}
+
+// 简历详情 (敏感数据)
+type ResumeResp {
+    Name      string   `json:"name"`
+    Phone     string   `json:"phone"`      // 招聘者可见，公开不可见
+    Experience []string `json:"experience"`
+    DownloadUrl string `json:"download_url"`
+}
+
+// AI 对话请求 (未来预留)
+type ChatReq {
+    Question string `json:"question"`
+}
+type ChatResp {
+    Answer string `json:"answer"`
+}
+
+// 通用空响应
+type Empty {}
+
+// ==========================================
+// 2. 服务定义
+// ==========================================
+
+// --- A. 公开服务组 (无需登录) ---
+@server(
+    group: public      // 代码生成到 internal/handler/public 目录
+    prefix: /v1/public // 路由前缀
+)
+service gateway-api {
+    @doc "用户登录"
+    @handler Login
+    post /login (LoginReq) returns (LoginResp)
+
+    @doc "简单的自我介绍 (公开)"
+    @handler GetIntro
+    get /intro returns (ChatResp) // 复用 ChatResp 返回简单文本
+}
+
+// --- B. 受保护服务组 (需要 JWT 鉴权) ---
+@server(
+    group: protected      // 代码生成到 internal/handler/protected 目录
+    prefix: /v1/api       // 路由前缀
+    jwt: Auth             // 关键：开启 JWT 自动校验！
+)
+service gateway-api {
+    @doc "获取完整简历 (仅限登录用户)"
+    @handler GetResume
+    get /resume returns (ResumeResp)
+
+    @doc "AI 对话接口 (未来功能)"
+    @handler Chat
+    post /chat (ChatReq) returns (ChatResp)
+    
+    @doc "验证 Token 是否有效 (前端保活)"
+    @handler Ping
+    get /ping returns (Empty)
+}
