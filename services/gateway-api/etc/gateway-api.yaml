@@ -1,0 +1,8 @@
+Name: gateway-api
+Host: 0.0.0.0
+Port: 8888
+
+# 对应 api 文件里的 jwt: Auth
+Auth:
+  AccessSecret: "u8w9F2k9c8s7a1"  # 随便乱写一串复杂的字符串作为密钥
+  AccessExpire: 86400             # Token 过期时间，单位秒 (这里是1天)
