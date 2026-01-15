@@ -29,6 +29,7 @@ func NewGetIntroLogic(ctx context.Context, svcCtx *svc.ServiceContext) *GetIntro
 
 func (l *GetIntroLogic) GetIntro() (resp *types.ChatResp, err error) {
 	// todo: add your logic here and delete this line
-
-	return
+	return &types.ChatResp{
+		Answer: "你好！我是 Arc，这是我的微服务实验室。目前你正在访问基于 K3s 和 Go-Zero 构建的网关服务。",
+	}, nil
 }
