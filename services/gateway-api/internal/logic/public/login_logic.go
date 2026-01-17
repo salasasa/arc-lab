@@ -4,8 +4,8 @@
 package public
 
 import (
+	"auth-rpc/pb/auth"
 	"context"
-	"errors"
 	"time"
 
 	"gateway-api/internal/svc"
@@ -31,27 +31,31 @@ func NewLoginLogic(ctx context.Context, svcCtx *svc.ServiceContext) *LoginLogic 
 }
 
 func (l *LoginLogic) Login(req *types.LoginReq) (resp *types.LoginResp, err error) {
-	// todo: add your logic here and delete this line
-	// TODO: 使用真正逻辑
-	// 1. Mock 验证账号密码
-	if req.Username == "admin" && req.Password == "123456" {
-		now := time.Now().Unix()
-		accessExpire := l.svcCtx.Config.Auth.AccessExpire
+	rpcResp, err := l.svcCtx.AuthRpc.Login(l.ctx, &auth.LoginRequest{
+		Username: req.Username,
+		Password: req.Password,
+	})
 
-		// 2. 签发 JWT Token
-		token, err := l.getJwtToken(l.svcCtx.Config.Auth.AccessSecret, now, accessExpire, req.Username)
-		if err != nil {
-			return nil, err
-		}
-
-		return &types.LoginResp{
-			AccessToken:  token,
-			AccessExpire: now + accessExpire,
-			Role:         "admin",
-		}, nil
+	// 如果 RPC 返回错误（比如密码错误），直接把错误甩回给前端
+	if err != nil {
+		return nil, err
 	}
 
-	return nil, errors.New("用户名或密码错误")
+	// 验证成功，签发 JWT
+	now := time.Now().Unix()
+	accessExpire := l.svcCtx.Config.Auth.AccessExpire
+
+	// 使用 RPC 返回的真实 Username 和 UserId 来签发 Token
+	token, err := l.getJwtToken(l.svcCtx.Config.Auth.AccessSecret, now, accessExpire, rpcResp.Username)
+	if err != nil {
+		return nil, err
+	}
+
+	return &types.LoginResp{
+		AccessToken:  token,
+		AccessExpire: now + accessExpire,
+		Role:         "admin", // TODO这里以后也可以根据 RPC 返回的权限字段动态赋值
+	}, nil
 
 }
 
