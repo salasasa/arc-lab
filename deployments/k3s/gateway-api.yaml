@@ -2,8 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: gateway-api
-  labels:
-    app: gateway-api
 spec:
   replicas: 1
   selector:
@@ -16,8 +14,8 @@ spec:
     spec:
       containers:
       - name: gateway-api
-        image: arc-lab-gateway:v1
-        imagePullPolicy: Never # 关键：让 K3s 直接找本地 Docker 镜像，不去镜像仓库拉
+        image: arc-gateway-api:v1.0 # 建议带上具体版本号
+        imagePullPolicy: Never
         ports:
         - containerPort: 8888
 ---
@@ -26,10 +24,10 @@ kind: Service
 metadata:
   name: gateway-api-svc
 spec:
-  type: NodePort # 通过宿主机端口暴露给外网
+  type: NodePort
+  selector:
+    app: gateway-api
   ports:
   - port: 8888
     targetPort: 8888
-    nodePort: 30088 # 你可以用 192.168.10.110:30088 访问
-  selector:
-    app: gateway-api
+    nodePort: 30088

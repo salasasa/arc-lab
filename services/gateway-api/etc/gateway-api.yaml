@@ -10,5 +10,5 @@ Auth:
 # 新增：AuthRPC 的地址
 AuthRpc:
   Endpoints:
-    - 127.0.0.1:8080  # 因为 auth-rpc 默认跑在 8080
+    - auth-rpc-svc:8080  # auth-rpc.yaml 里 Service 的名字
   NonBlock: true

@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth-rpc
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth-rpc
+  template:
+    metadata:
+      labels:
+        app: auth-rpc
+    spec:
+      containers:
+      - name: auth-rpc
+        image: arc-auth-rpc:v1.0  # 确保与你 docker build 的 tag 一致
+        imagePullPolicy: Never
+        ports:
+        - containerPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-rpc-svc  # 关键：这个名字就是网关在容器内访问的“域名”
+spec:
+  selector:
+    app: auth-rpc
+  ports:
+  - port: 8080
+    targetPort: 8080
